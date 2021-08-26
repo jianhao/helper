@@ -1,2 +1,1 @@
-export * from './EnumData'
-const a = 1
+export * from './math'

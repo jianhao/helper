@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import { series } from 'gulp'
 import path from 'path'
 import fse from 'fs-extra'
@@ -31,16 +32,15 @@ const paths = {
   lib: path.join(__dirname, '/lib'),
 }
 
-
 // step1: 删除 lib 文件
-const clearLibFile: TaskFunc = async (cb) => {
+const clearLibFile: TaskFunc = async cb => {
   fse.removeSync(paths.lib)
   log.progress('Deleted lib file')
   cb()
 }
 
 // step2: rollup 打包
-const buildByRollup: TaskFunc = async (cb) => {
+const buildByRollup: TaskFunc = async cb => {
   const inputOptions = {
     input: rollupConfig.input,
     external: rollupConfig.external,
@@ -60,10 +60,11 @@ const buildByRollup: TaskFunc = async (cb) => {
 }
 
 // step3: api-extractor 整理 .d.ts 文件
-const apiExtractorGenerate: TaskFunc = async (cb) => {
+const apiExtractorGenerate: TaskFunc = async cb => {
   const apiExtractorJsonPath: string = path.join(__dirname, './api-extractor.json')
   // 加载并解析 api-extractor.json 文件
-  const extractorConfig: ExtractorConfig = await ExtractorConfig.loadFileAndPrepare(apiExtractorJsonPath)
+  const extractorConfig: ExtractorConfig =
+    await ExtractorConfig.loadFileAndPrepare(apiExtractorJsonPath)
   // 判断是否存在 index.d.ts 文件，这里必须异步先访问一边，不然后面找不到会报错
   const isExist: boolean = await fse.pathExists(extractorConfig.mainEntryPointFilePath)
 
@@ -96,7 +97,7 @@ const apiExtractorGenerate: TaskFunc = async (cb) => {
 }
 
 // step4:自定义生成 changelog
-export const changelog: TaskFunc = async (cb) => {
+export const changelog: TaskFunc = async cb => {
   const changelogPath: string = path.join(paths.root, 'CHANGELOG.md')
   // 对命令 conventional-changelog -p angular -i CHANGELOG.md -w -r 0
   const changelogPipe = await conventionalChangelog({
@@ -106,7 +107,7 @@ export const changelog: TaskFunc = async (cb) => {
   changelogPipe.setEncoding('utf8')
 
   const resultArray = ['# 工具库更新日志\n\n']
-  changelogPipe.on('data', (chunk) => {
+  changelogPipe.on('data', chunk => {
     // 原来的 commits 路径是进入提交列表
     chunk = chunk.replace(/\/commits\//g, '/commit/')
     resultArray.push(chunk)
@@ -118,7 +119,7 @@ export const changelog: TaskFunc = async (cb) => {
 }
 
 // 全部完成
-const complete: TaskFunc = (cb) => {
+const complete: TaskFunc = cb => {
   log.progress('---- end ----')
   cb()
 }
